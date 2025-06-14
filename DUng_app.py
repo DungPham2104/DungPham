@@ -1,4 +1,4 @@
-pip install streamlit
+
 
 import streamlit as st
 import pandas as pd
@@ -45,5 +45,4 @@ with st.form("order_form"):
 st.markdown("---")
 st.markdown("© 2025 Web Bán Laptop - Streamlit Demo by [YourName]")
 
-streamlit run laptop_store.py
 
