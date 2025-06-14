@@ -1,48 +1,56 @@
-
-
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 
-# Sample data for laptops
-laptops = [
-    {"Brand": "Dell", "Model": "XPS 13", "Price": 25000000, "RAM": "16GB", "Storage": "512GB SSD"},
-    {"Brand": "HP", "Model": "Spectre x360", "Price": 27000000, "RAM": "16GB", "Storage": "1TB SSD"},
-    {"Brand": "Apple", "Model": "MacBook Air M2", "Price": 32000000, "RAM": "8GB", "Storage": "256GB SSD"},
-    {"Brand": "Asus", "Model": "ROG Zephyrus", "Price": 38000000, "RAM": "32GB", "Storage": "1TB SSD"},
-    {"Brand": "Lenovo", "Model": "ThinkPad X1 Carbon", "Price": 29000000, "RAM": "16GB", "Storage": "512GB SSD"}
+# Dữ liệu mẫu
+data = [
+    {"Brand": "Dell", "Model": "XPS 13", "Price": 25000000, "RAM": "16GB", "Storage": "512GB SSD", "Sold": 120},
+    {"Brand": "HP", "Model": "Spectre x360", "Price": 27000000, "RAM": "16GB", "Storage": "1TB SSD", "Sold": 95},
+    {"Brand": "Apple", "Model": "MacBook Air M2", "Price": 32000000, "RAM": "8GB", "Storage": "256GB SSD", "Sold": 150},
+    {"Brand": "Asus", "Model": "ROG Zephyrus", "Price": 38000000, "RAM": "32GB", "Storage": "1TB SSD", "Sold": 60},
+    {"Brand": "Lenovo", "Model": "ThinkPad X1 Carbon", "Price": 29000000, "RAM": "16GB", "Storage": "512GB SSD", "Sold": 80},
+    {"Brand": "Dell", "Model": "Inspiron 15", "Price": 22000000, "RAM": "8GB", "Storage": "256GB SSD", "Sold": 110},
+    {"Brand": "HP", "Model": "Pavilion 14", "Price": 21000000, "RAM": "8GB", "Storage": "512GB SSD", "Sold": 105}
 ]
 
-df = pd.DataFrame(laptops)
+df = pd.DataFrame(data)
 
-# App title
-st.title("💻 Web Bán Laptop")
+# Cấu hình giao diện
+st.set_page_config(page_title="Laptop Sales Dashboard", layout="wide")
+st.title("📊 Web Bán Laptop - Trực Quan Hóa Dữ Liệu")
 
-# Sidebar filters
-st.sidebar.header("🔍 Bộ lọc tìm kiếm")
-brand_filter = st.sidebar.multiselect("Hãng sản xuất", options=df["Brand"].unique(), default=df["Brand"].unique())
-max_price = st.sidebar.slider("Giá tối đa (VNĐ)", 20000000, 50000000, 40000000)
+# Sidebar - Bộ lọc
+st.sidebar.header("🔍 Bộ lọc")
+selected_brands = st.sidebar.multiselect("Chọn hãng laptop", options=df["Brand"].unique(), default=df["Brand"].unique())
+max_price = st.sidebar.slider("Giá tối đa (VNĐ)", 15000000, 40000000, 35000000)
 
-# Apply filters
-filtered_df = df[(df["Brand"].isin(brand_filter)) & (df["Price"] <= max_price)]
+# Áp dụng bộ lọc
+filtered_df = df[(df["Brand"].isin(selected_brands)) & (df["Price"] <= max_price)]
 
-# Display products
-st.subheader("🛒 Danh sách Laptop")
+# Hiển thị dữ liệu
+st.subheader("📋 Danh sách sản phẩm đã lọc")
 st.dataframe(filtered_df)
 
-# Simulate order form
-st.subheader("📦 Đặt hàng")
-with st.form("order_form"):
-    selected_model = st.selectbox("Chọn mẫu laptop", filtered_df["Model"])
-    customer_name = st.text_input("Họ tên")
-    customer_email = st.text_input("Email")
-    customer_address = st.text_area("Địa chỉ giao hàng")
-    submit = st.form_submit_button("Đặt mua")
+# Biểu đồ 1: Tổng số sản phẩm bán ra theo hãng
+st.subheader("📈 Biểu đồ số lượng bán ra theo hãng")
+sales_by_brand = filtered_df.groupby("Brand")["Sold"].sum().reset_index()
+fig1 = px.bar(sales_by_brand, x="Brand", y="Sold", title="Sản phẩm bán ra theo Hãng", color="Brand", text="Sold")
+st.plotly_chart(fig1, use_container_width=True)
 
-    if submit:
-        st.success(f"Cảm ơn {customer_name}! Đơn hàng {selected_model} của bạn đã được ghi nhận.")
+# Biểu đồ 2: Phân bố số lượng bán theo Model
+st.subheader("📊 Biểu đồ phân phối doanh số theo mẫu laptop")
+fig2 = px.pie(filtered_df, names="Model", values="Sold", title="Tỉ lệ bán theo mẫu")
+st.plotly_chart(fig2, use_container_width=True)
+
+# Biểu đồ 3: Mối quan hệ giữa Giá và Số lượng bán
+st.subheader("💡 Biểu đồ Giá vs Số lượng bán")
+fig3 = px.scatter(filtered_df, x="Price", y="Sold", color="Brand", size="Sold",
+                  hover_data=["Model"], title="Giá và số lượng bán theo sản phẩm")
+st.plotly_chart(fig3, use_container_width=True)
 
 # Footer
 st.markdown("---")
-st.markdown("© 2025 Web Bán Laptop - Streamlit Demo by [YourName]")
+st.markdown("📍 © 2025 Dashboard Web Bán Laptop - Made with ❤️ using Streamlit")
+
 
 
